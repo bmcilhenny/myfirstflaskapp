@@ -1,11 +1,23 @@
 from flask import Flask, render_template, flash, redirect, request, url_for, session, logging
 from data import Articles
-from flask_mysqldb import MYSQL
+from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
 
 app = Flask(__name__)
 app.debug = True
+
+
+# Config MySQL
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_DB'] = 'myflaskapp'
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+# init MYSQL
+mysql = MySQL(app)
+
+
+
 
 Articles = Articles()
 
@@ -38,8 +50,17 @@ class RegisterForm(Form):
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm(request.form)
-    if request.method == 'POST' and form.validate();
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        email = form.email.data
+        username = form.username.data
+        password = sha256_crypt.encrypt(str(form.password.data))
 
+        # Create cursor
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO users(name, email, username, password) VALUES(%s, %s, %s, %s)", (name, email, username, password))
+
+        return render_template('register.html', form=form)
     return render_template('register.html', form=form)
 
 
