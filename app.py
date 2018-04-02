@@ -3,6 +3,9 @@ from data import Articles
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators
 from passlib.hash import sha256_crypt
+# For debugging purposes use ->
+# import pdb; pdb.set_trace()
+
 
 app = Flask(__name__)
 app.debug = True
@@ -11,6 +14,7 @@ app.debug = True
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Ilovebamboo88!'
 app.config['MYSQL_DB'] = 'myflaskapp'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MYSQL
@@ -41,7 +45,7 @@ class RegisterForm(Form):
     name = StringField('Name', [validators.Length(min=1, max=50)])
     username = StringField('Username', [validators.Length(min=4, max=25)])
     email = StringField('Email', [validators.Length(min=6, max=50)])
-    password = PasswordField('Username', [
+    password = PasswordField('Password', [
         validators.DataRequired(),
         validators.EqualTo('confirm', message='Passwords do not match')
     ])
@@ -58,11 +62,21 @@ def register():
 
         # Create cursor
         cur = mysql.connection.cursor()
+
         cur.execute("INSERT INTO users(name, email, username, password) VALUES(%s, %s, %s, %s)", (name, email, username, password))
 
-        return render_template('register.html', form=form)
+        # Commit to DB
+        mysql.connection.commit()
+
+        #  Close connection
+        cur.close()
+
+        flash('You are now registered and can login')
+
+        redirect(url_for('index'))
     return render_template('register.html', form=form)
 
 
 if __name__ == '__main__':
+    app.secret_key='secret123'
     app.run()
