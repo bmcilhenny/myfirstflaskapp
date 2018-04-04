@@ -1,5 +1,13 @@
 {% extends  'layout.html' %}
 
 {% block body %}
-  HOME
+<div class="jumbotron text-center">
+  <h1>Welcome to My Diary App</h1>
+  <p class="lead">I used Flask to build this app, uses MySQL to query db</p>
+  {% if session.logged_in == NULL %}
+    <a href="/register" class="btn btn-primary btn-lg">Register</a>
+    <a href="/login" class="btn btn-success btn-lg">Login</a>
+  {% endif %}
+
+</div>
 {% endblock %}
